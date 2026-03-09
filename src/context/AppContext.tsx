@@ -58,10 +58,19 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const initialSavedCards: SavedCard[] = [
+  { id: "card-415942-4532", label: "Visa •••• 4532", brand: "visa", last4: "4532" },
+  { id: "card-541500-8721", label: "Mastercard •••• 8721", brand: "mastercard", last4: "8721" },
+];
+
+const initialSavedWallets: SavedWallet[] = [
+  { id: "wallet-apple-mgth@icloud.com", type: "apple", email: "mgth@icloud.com" },
+];
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [ciudadanos, setCiudadanos] = useState<Ciudadano[]>(initialCiudadanos);
-  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
-  const [savedWallets, setSavedWallets] = useState<SavedWallet[]>([]);
+  const [savedCards, setSavedCards] = useState<SavedCard[]>(initialSavedCards);
+  const [savedWallets, setSavedWallets] = useState<SavedWallet[]>(initialSavedWallets);
 
   const ciudadanoActual = ciudadanos[0];
 

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle, Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Adeudo } from "@/data/seedData";
+import { Adeudo } from "@/context/AppContext";
 
 interface BalancesStepProps {
   adeudos: Adeudo[];

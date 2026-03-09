@@ -1,16 +1,31 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Download, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Adeudo, ciudadano } from "@/data/seedData";
+import { Adeudo } from "@/context/AppContext";
 
 interface ConfirmationStepProps {
   selectedAdeudos: Adeudo[];
   total: number;
-  method: "tarjeta" | "spei";
+  method: "tarjeta" | "spei" | "wallet";
+  cardLabel: string | null;
+  numeroCuenta: string;
   onReset: () => void;
 }
 
-const ConfirmationStep = ({ selectedAdeudos, total, method, onReset }: ConfirmationStepProps) => {
+const methodLabel = (method: "tarjeta" | "spei" | "wallet", cardLabel: string | null) => {
+  if (method === "tarjeta") return cardLabel ?? "Tarjeta";
+  if (method === "spei") return "SPEI";
+  return cardLabel ?? "Pago Digital";
+};
+
+const ConfirmationStep = ({
+  selectedAdeudos,
+  total,
+  method,
+  cardLabel,
+  numeroCuenta,
+  onReset,
+}: ConfirmationStepProps) => {
   const folio = `PAG-2025-${String(Math.floor(Math.random() * 9000) + 1000).padStart(5, "0")}`;
   const now = new Date();
   const fecha = now.toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" });
@@ -44,11 +59,11 @@ const ConfirmationStep = ({ selectedAdeudos, total, method, onReset }: Confirmat
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Cuenta</span>
-          <span className="font-medium text-foreground">{ciudadano.numeroCuenta}</span>
+          <span className="font-medium text-foreground">{numeroCuenta}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Método</span>
-          <span className="font-medium text-foreground">{method === "tarjeta" ? "Tarjeta" : "SPEI"}</span>
+          <span className="font-medium text-foreground">{methodLabel(method, cardLabel)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Fecha y hora</span>
@@ -56,7 +71,7 @@ const ConfirmationStep = ({ selectedAdeudos, total, method, onReset }: Confirmat
         </div>
         <div className="border-t border-border pt-2">
           <p className="text-xs text-muted-foreground mb-2">Períodos cubiertos</p>
-          {selectedAdeudos.map(a => (
+          {selectedAdeudos.map((a) => (
             <div key={a.id} className="flex justify-between text-sm py-0.5">
               <span className="text-foreground">{a.periodo}</span>
               <span className="font-medium text-foreground">${a.monto.toFixed(2)}</span>

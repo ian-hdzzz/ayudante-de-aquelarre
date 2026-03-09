@@ -1,5 +1,8 @@
-import { ChevronRight, FileText, Pencil, Phone, Mail, Calendar, MapPin, Cpu, Receipt, CreditCard, Banknote, ArrowLeftRight, CheckCircle } from "lucide-react";
+import { ChevronRight, FileText, Pencil, Phone, Mail, Calendar, MapPin, Cpu, Receipt, CreditCard, Banknote, ArrowLeftRight, CheckCircle, Bell, BellOff, Loader2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useApp } from "@/context/AppContext";
 
 const clientesDetalle: Record<string, {
   nombre: string;
@@ -96,6 +99,24 @@ interface AdminClienteDetalleProps {
 
 const AdminClienteDetalle = ({ numeroCuenta, onBack }: AdminClienteDetalleProps) => {
   const cliente = clientesDetalle[numeroCuenta] ?? clientesDetalle["SON-2024-00847"];
+  const { ciudadanos, sendReminder } = useApp();
+  const ciudadano = ciudadanos.find((c) => c.numeroCuenta === numeroCuenta) ?? ciudadanos[0];
+  const tienePendientes = ciudadano.adeudos.some(
+    (a) => a.estatus === "vencido" || a.estatus === "proximo"
+  );
+  const [sending, setSending] = useState(false);
+
+  const handleSendReminder = () => {
+    if (ciudadano.reminderSent || sending) return;
+    setSending(true);
+    setTimeout(() => {
+      sendReminder(ciudadano.numeroCuenta);
+      setSending(false);
+      toast.success("Recordatorio enviado", {
+        description: `Se notificó a ${cliente.nombre} por SMS y correo electrónico.`,
+      });
+    }, 1500);
+  };
 
   return (
     <div className="p-6 space-y-5">
@@ -111,7 +132,23 @@ const AdminClienteDetalle = ({ numeroCuenta, onBack }: AdminClienteDetalleProps)
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{cliente.nombre}</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {tienePendientes && (
+            <button
+              onClick={handleSendReminder}
+              disabled={ciudadano.reminderSent || sending}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : ciudadano.reminderSent ? (
+                <BellOff className="w-4 h-4" />
+              ) : (
+                <Bell className="w-4 h-4" />
+              )}
+              {sending ? "Enviando..." : ciudadano.reminderSent ? "Recordatorio enviado" : "Enviar Recordatorio"}
+            </button>
+          )}
           <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
             <Pencil className="w-4 h-4 text-blue-500" />
             Editar Datos

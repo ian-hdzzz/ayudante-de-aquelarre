@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
-import { CreditCard, Building2 } from "lucide-react";
+import { CreditCard, Building2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+type PaymentMethod = "tarjeta" | "spei" | "wallet";
+
 interface PaymentMethodStepProps {
-  method: "tarjeta" | "spei" | null;
-  onSelect: (method: "tarjeta" | "spei") => void;
+  method: PaymentMethod | null;
+  onSelect: (method: PaymentMethod) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -23,6 +25,12 @@ const PaymentMethodStep = ({ method, onSelect, onNext, onBack }: PaymentMethodSt
       icon: Building2,
       title: "Transferencia SPEI",
       description: "Desde tu banca en línea",
+    },
+    {
+      id: "wallet" as const,
+      icon: Smartphone,
+      title: "Pago Digital",
+      description: "Apple Pay o Google Pay",
     },
   ];
 

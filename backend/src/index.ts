@@ -40,6 +40,32 @@ app.get("/health", (_req, res) => {
 });
 
 // ─────────────────────────────────────────────
+// Seed endpoint (protegido con SEED_SECRET)
+// POST /admin/seed  → { "secret": "..." }
+// ─────────────────────────────────────────────
+
+app.post("/admin/seed", async (req, res) => {
+  const { secret } = req.body;
+  const SEED_SECRET = process.env.SEED_SECRET || "supra_seed_2025";
+
+  if (secret !== SEED_SECRET) {
+    return res.status(401).json({ success: false, error: "No autorizado" });
+  }
+
+  try {
+    const { execSync } = await import("child_process");
+    execSync("node node_modules/.bin/tsx prisma/seed.ts", {
+      cwd: "/app",
+      stdio: "pipe",
+      env: { ...process.env },
+    });
+    return res.json({ success: true, message: "Seed ejecutado correctamente" });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────
 // Rutas
 // ─────────────────────────────────────────────
 

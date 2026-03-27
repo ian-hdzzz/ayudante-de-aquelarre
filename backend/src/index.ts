@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import prisma from "./db/client";
 
 import contratosRouter from "./routes/contratos";
 import recibosRouter from "./routes/recibos";
@@ -87,13 +88,29 @@ app.use(errorHandler);
 // Start
 // ─────────────────────────────────────────────
 
-app.listen(PORT, () => {
+async function autoSeedIfEmpty() {
+  try {
+    const count = await prisma.contrato.count();
+    if (count === 0) {
+      console.log("📦 DB vacía — corriendo seed automático...");
+      const { execSync } = await import("child_process");
+      execSync("node node_modules/.bin/tsx prisma/seed.ts", {
+        cwd: process.cwd(),
+        stdio: "inherit",
+        env: { ...process.env },
+      });
+      console.log("✅ Seed completado");
+    } else {
+      console.log(`✅ DB ya tiene ${count} contratos — seed omitido`);
+    }
+  } catch (err) {
+    console.error("⚠️  Error en auto-seed:", err);
+  }
+}
+
+app.listen(PORT, async () => {
   console.log(`\n🚀 SUPRA API corriendo en http://localhost:${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-  console.log(`   Contrato: http://localhost:${PORT}/api/contrato/SUP-001`);
-  console.log(`   Deuda:    http://localhost:${PORT}/api/contrato/SUP-003/deuda`);
-  console.log(`   Tickets:  http://localhost:${PORT}/api/tickets`);
-  console.log(`   Docs:     http://localhost:${PORT}/health\n`);
+  await autoSeedIfEmpty();
 });
 
 export default app;

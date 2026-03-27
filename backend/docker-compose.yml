@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: supra_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: supra
+      POSTGRES_PASSWORD: supra_pass
+      POSTGRES_DB: supra_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - supra_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supra -d supra_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: supra_api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://supra:supra_pass@postgres:5432/supra_db
+      PORT: 3001
+      SERVER_BASE_URL: http://localhost:3001
+      JWT_SECRET: dev_secret_local
+      ALLOWED_ORIGINS: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  supra_pgdata:

@@ -8,6 +8,7 @@ import recibosRouter from "./routes/recibos";
 import clientesRouter from "./routes/clientes";
 import ticketsRouter from "./routes/tickets";
 import ubicacionesRouter from "./routes/ubicaciones";
+import soapRouter from "./routes/soap";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 
 const app = express();
@@ -69,6 +70,9 @@ app.post("/admin/seed", async (req, res) => {
 // ─────────────────────────────────────────────
 // Rutas
 // ─────────────────────────────────────────────
+
+// SOAP-compatible proxy for the CEA agent (change CEA_API_BASE → supra-back.whoopflow.com/Comercial/services)
+app.use("/Comercial/services", soapRouter);
 
 app.use("/api/contrato", contratosRouter);
 app.use("/api/cliente", clientesRouter);
